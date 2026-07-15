@@ -3,21 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fbfaf7; /* sand-50 */
+  color: #1e2a2c; /* ink */
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+}
+
+/* Foco visible y consistente en todo lo interactivo (a11y, PRD §11). */
+:focus-visible {
+  outline: 2px solid #1f7a6d; /* brand-600 */
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respetar reduced-motion desde el inicio (a11y). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer utilities {
