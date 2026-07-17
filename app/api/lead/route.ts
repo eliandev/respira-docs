@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { leadSchema } from "@/lib/validation";
-import { getDb } from "@/lib/firebase-admin";
+import { getDb, firestoreDisponible } from "@/lib/firebase-admin";
 
 // firebase-admin necesita el runtime de Node (no Edge).
 export const runtime = "nodejs";
@@ -46,27 +46,51 @@ export async function POST(req: Request) {
     createdAt: new Date().toISOString(),
   };
 
-  let stored = false;
+  const webhook = process.env.N8N_WEBHOOK_URL;
+  const algunDestinoConfigurado = firestoreDisponible() || Boolean(webhook);
+
+  let firestoreGuardado = false;
   try {
     const db = await getDb();
     if (db) {
       await db.collection("leads").add(registro);
-      stored = true;
+      firestoreGuardado = true;
     }
+  } catch (err) {
+    // Firestore es la persistencia primaria: si falla, no podemos garantizar el lead.
+    console.error("[lead] error guardando en Firestore:", err);
+    return NextResponse.json({ ok: false, error: "storage" }, { status: 500 });
+  }
 
-    const webhook = process.env.N8N_WEBHOOK_URL;
-    if (webhook) {
-      // Dispara el Lead Engine (reto 4). No tumba la respuesta si el webhook falla.
-      await fetch(webhook, {
+  // El webhook es secundario: su fallo NO debe tumbar un guardado en Firestore que sí
+  // funcionó, pero tampoco puede tragarse en silencio (antes se perdía el lead sin rastro).
+  let webhookEntregado = false;
+  if (webhook) {
+    try {
+      const res = await fetch(webhook, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(registro),
-      }).catch(() => {});
-      stored = true;
+      });
+      if (!res.ok) {
+        throw new Error(`respuesta ${res.status}`);
+      }
+      webhookEntregado = true;
+    } catch (err) {
+      console.error("[lead] error disparando el webhook n8n:", err);
     }
-  } catch (err) {
-    console.error("[lead] error guardando:", err);
-    return NextResponse.json({ ok: false, error: "storage" }, { status: 500 });
+  }
+
+  const stored = firestoreGuardado || webhookEntregado;
+
+  // Había al menos un destino configurado pero ninguno recibió el lead: es un fallo real
+  // (p.ej. el webhook era el único destino y no respondió). Propagarlo para que el cliente
+  // reintente en vez de mostrar un "éxito" falso mientras el lead se pierde.
+  if (algunDestinoConfigurado && !stored) {
+    return NextResponse.json(
+      { ok: false, error: "delivery" },
+      { status: 502 },
+    );
   }
 
   if (!stored) {
