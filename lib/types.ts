@@ -4,6 +4,9 @@
 
 export type Step = "welcome" | "debts" | "result" | "advisor";
 
+/** Orden canónico de los pasos del flujo (navegación y progreso). */
+export const STEP_ORDER: Step[] = ["welcome", "debts", "result", "advisor"];
+
 /** Una deuda tal como la ingresa la persona. */
 export interface Deuda {
   id: string;

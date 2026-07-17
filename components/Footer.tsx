@@ -1,4 +1,5 @@
 import { dict } from "@/lib/i18n";
+import ExternalLink from "./ExternalLink";
 
 // Recursos de ayuda + disclaimer siempre visibles, en todas las pantallas (PRD §9).
 export default function Footer() {
@@ -8,14 +9,11 @@ export default function Footer() {
         <p>
           {dict.honesty.noAsesoria} {dict.honesty.estimacion}
         </p>
-        <a
+        <ExternalLink
           href={dict.resources.ssfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-fit font-medium text-brand-700 underline underline-offset-4 hover:text-brand-800"
-        >
-          {dict.resources.ssfLabel} <span aria-hidden>↗</span>
-        </a>
+          label={dict.resources.ssfLabel}
+          className="w-fit font-medium"
+        />
       </div>
     </footer>
   );

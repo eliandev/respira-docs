@@ -5,9 +5,11 @@ import { dict } from "@/lib/i18n";
 import { useRespira } from "./RespiraApp";
 import DebtRow from "./DebtRow";
 import NumberField from "./NumberField";
+import StepHeader from "./StepHeader";
 import { formatMoneda, formatPorcentaje } from "@/lib/format";
 import { baseline } from "@/lib/finance";
 import { deudaSchema } from "@/lib/validation";
+import { btnGhost, btnPrimary, cn } from "@/lib/ui";
 
 export default function StepDebts() {
   const { state, dispatch } = useRespira();
@@ -20,10 +22,7 @@ export default function StepDebts() {
 
   return (
     <section className="flex flex-col gap-6 py-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-ink sm:text-3xl">{t.title}</h1>
-        <p className="text-muted">{t.subtitle}</p>
-      </header>
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       {deudas.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-sand-300 bg-white/60 p-8 text-center">
@@ -31,7 +30,7 @@ export default function StepDebts() {
           <button
             type="button"
             onClick={() => dispatch({ type: "add_deuda" })}
-            className="mt-4 rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-brand-700"
+            className={cn(btnPrimary, "mt-4 px-5 py-3")}
           >
             {t.addFirst}
           </button>
@@ -94,7 +93,7 @@ export default function StepDebts() {
         <button
           type="button"
           onClick={() => dispatch({ type: "back" })}
-          className="rounded-xl px-4 py-3 font-medium text-muted transition-colors hover:text-ink"
+          className={btnGhost}
         >
           {dict.common.volver}
         </button>
@@ -102,7 +101,10 @@ export default function StepDebts() {
           type="button"
           onClick={() => dispatch({ type: "next" })}
           disabled={!puedeContinuar}
-          className="ml-auto rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-sand-200 disabled:text-sand-500"
+          className={cn(
+            btnPrimary,
+            "ml-auto px-6 py-3 disabled:cursor-not-allowed disabled:bg-sand-200 disabled:text-sand-500",
+          )}
         >
           {t.continuar}
         </button>

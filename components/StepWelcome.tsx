@@ -2,6 +2,7 @@
 
 import { dict } from "@/lib/i18n";
 import { useRespira } from "./RespiraApp";
+import { btnPrimary, cn } from "@/lib/ui";
 
 export default function StepWelcome() {
   const { dispatch } = useRespira();
@@ -47,7 +48,10 @@ export default function StepWelcome() {
       <button
         type="button"
         onClick={() => dispatch({ type: "next" })}
-        className="w-full rounded-xl bg-brand-600 px-6 py-4 text-base font-semibold text-white transition-colors hover:bg-brand-700 sm:w-auto sm:self-start"
+        className={cn(
+          btnPrimary,
+          "w-full px-6 py-4 text-base sm:w-auto sm:self-start",
+        )}
       >
         {t.cta}
       </button>

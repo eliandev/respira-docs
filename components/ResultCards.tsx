@@ -3,6 +3,7 @@
 import type { Baseline, Escenario } from "@/lib/types";
 import { dict } from "@/lib/i18n";
 import { formatMoneda, formatMeses, formatPorcentaje } from "@/lib/format";
+import { card } from "@/lib/ui";
 
 function Row({
   label,
@@ -67,7 +68,7 @@ export default function ResultCards({
 
       {/* Comparación lado a lado */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-line bg-white p-5 shadow-soft">
+        <div className={card}>
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">
             {t.baselineTitle}
           </h3>
