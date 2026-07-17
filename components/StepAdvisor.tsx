@@ -3,10 +3,13 @@
 import { useMemo, useState } from "react";
 import { dict } from "@/lib/i18n";
 import { useRespira } from "./RespiraApp";
-import { baseline, escenarioConsolidado, construirResumen } from "@/lib/finance";
+import { useResultado } from "./useResultado";
+import { construirResumen } from "@/lib/finance";
 import { leadSchema } from "@/lib/validation";
 import { LEAD_CAPTURE_ENABLED } from "@/lib/config";
 import type { ContactoPreferido } from "@/lib/types";
+import { btnGhost, btnPrimary, card, cn, textInput } from "@/lib/ui";
+import StepHeader from "./StepHeader";
 import Resources from "./Resources";
 
 const OPCIONES: ContactoPreferido[] = ["whatsapp", "telefono", "email"];
@@ -23,15 +26,15 @@ export default function StepAdvisor() {
   const { state, dispatch } = useRespira();
   const t = dict.advisor;
 
-  const resumen = useMemo(() => {
-    const base = baseline(state.deudas);
-    const esc = escenarioConsolidado(
-      base,
-      state.tasaConsolidada,
-      state.plazoConsolidado,
-    );
-    return construirResumen(base, esc, state.deudas.length);
-  }, [state.deudas, state.tasaConsolidada, state.plazoConsolidado]);
+  const { base, esc } = useResultado(
+    state.deudas,
+    state.tasaConsolidada,
+    state.plazoConsolidado,
+  );
+  const resumen = useMemo(
+    () => construirResumen(base, esc, state.deudas.length),
+    [base, esc, state.deudas.length],
+  );
 
   const [nombre, setNombre] = useState("");
   const [preferido, setPreferido] = useState<ContactoPreferido>("whatsapp");
@@ -82,10 +85,7 @@ export default function StepAdvisor() {
 
   return (
     <section className="flex flex-col gap-6 py-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-ink sm:text-3xl">{t.title}</h1>
-        <p className="text-muted">{t.subtitle}</p>
-      </header>
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       <ul className="flex flex-col gap-2">
         {t.puntos.map((p) => (
@@ -107,7 +107,7 @@ export default function StepAdvisor() {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-5 shadow-soft"
+          className={cn("flex flex-col gap-4", card)}
         >
           <p className="font-medium text-ink">{t.form.titulo}</p>
 
@@ -120,7 +120,7 @@ export default function StepAdvisor() {
               onChange={(e) => setNombre(e.target.value)}
               placeholder={t.form.nombrePlaceholder}
               autoComplete="name"
-              className="w-full rounded-lg border border-line bg-sand-50 px-3 py-2 text-ink outline-none placeholder:text-sand-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className={cn(textInput, "placeholder:text-sand-400")}
             />
           </label>
 
@@ -161,7 +161,7 @@ export default function StepAdvisor() {
               onChange={(e) => setContacto(e.target.value)}
               inputMode={preferido === "email" ? "email" : "tel"}
               autoComplete={preferido === "email" ? "email" : "tel"}
-              className="w-full rounded-lg border border-line bg-sand-50 px-3 py-2 text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className={textInput}
             />
           </label>
 
@@ -184,7 +184,10 @@ export default function StepAdvisor() {
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-sand-300"
+            className={cn(
+              btnPrimary,
+              "px-6 py-3 disabled:cursor-not-allowed disabled:bg-sand-300",
+            )}
           >
             {enviando ? t.form.enviando : t.form.enviar}
           </button>
@@ -195,9 +198,7 @@ export default function StepAdvisor() {
           </p>
         </form>
       ) : (
-        <div className="rounded-2xl border border-line bg-white p-5 text-sm text-muted shadow-soft">
-          {t.sinConfig}
-        </div>
+        <div className={cn(card, "text-sm text-muted")}>{t.sinConfig}</div>
       )}
 
       <Resources />
@@ -206,7 +207,7 @@ export default function StepAdvisor() {
         <button
           type="button"
           onClick={() => dispatch({ type: "back" })}
-          className="rounded-xl px-4 py-3 font-medium text-muted transition-colors hover:text-ink"
+          className={btnGhost}
         >
           {t.volver}
         </button>

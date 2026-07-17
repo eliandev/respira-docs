@@ -1,6 +1,7 @@
 "use client";
 
 import { dict } from "@/lib/i18n";
+import { card, cn } from "@/lib/ui";
 
 interface Props {
   tasa: number;
@@ -12,7 +13,7 @@ interface Props {
 export default function Sliders({ tasa, plazo, onTasa, onPlazo }: Props) {
   const s = dict.result.sliders;
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border border-line bg-white p-5 shadow-soft">
+    <div className={cn("flex flex-col gap-5", card)}>
       <div>
         <div className="mb-2 flex items-baseline justify-between">
           <label htmlFor="slider-tasa" className="text-sm font-medium text-ink">

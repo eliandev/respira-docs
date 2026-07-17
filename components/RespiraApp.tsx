@@ -8,15 +8,13 @@ import {
   useRef,
   useMemo,
 } from "react";
-import type { Deuda, Step } from "@/lib/types";
+import { STEP_ORDER, type Deuda, type Step } from "@/lib/types";
 import Stepper from "./Stepper";
 import StepWelcome from "./StepWelcome";
 import StepDebts from "./StepDebts";
 import StepResult from "./StepResult";
 import StepAdvisor from "./StepAdvisor";
 import Footer from "./Footer";
-
-const ORDER: Step[] = ["welcome", "debts", "result", "advisor"];
 
 // Defaults consolidado: razonables y editables (PRD §8). Referencia SSF, no una promesa.
 const TASA_DEFAULT = 18;
@@ -86,13 +84,13 @@ function reducer(state: State, action: Action): State {
     case "go":
       return { ...state, step: destinoValido(action.step, state.deudas) };
     case "next": {
-      const i = ORDER.indexOf(state.step);
-      const target = ORDER[Math.min(i + 1, ORDER.length - 1)];
+      const i = STEP_ORDER.indexOf(state.step);
+      const target = STEP_ORDER[Math.min(i + 1, STEP_ORDER.length - 1)];
       return { ...state, step: destinoValido(target, state.deudas) };
     }
     case "back": {
-      const i = ORDER.indexOf(state.step);
-      return { ...state, step: ORDER[Math.max(i - 1, 0)] };
+      const i = STEP_ORDER.indexOf(state.step);
+      return { ...state, step: STEP_ORDER[Math.max(i - 1, 0)] };
     }
     case "set_lead_enviado":
       return { ...state, leadEnviado: action.value };

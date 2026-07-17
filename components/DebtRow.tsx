@@ -4,6 +4,7 @@ import type { Deuda } from "@/lib/types";
 import { dict } from "@/lib/i18n";
 import { useRespira } from "./RespiraApp";
 import NumberField from "./NumberField";
+import { cn, textInput } from "@/lib/ui";
 
 export default function DebtRow({
   deuda,
@@ -30,7 +31,7 @@ export default function DebtRow({
               value={deuda.entidad}
               onChange={(e) => upd({ entidad: e.target.value })}
               placeholder={c.entidadPlaceholder}
-              className="w-full rounded-lg border border-line bg-sand-50 px-3 py-2 text-ink outline-none placeholder:text-sand-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className={cn(textInput, "placeholder:text-sand-400")}
             />
           </label>
           <button

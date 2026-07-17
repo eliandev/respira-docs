@@ -4,6 +4,7 @@ import type { Baseline, Escenario } from "@/lib/types";
 import { dict } from "@/lib/i18n";
 import { formatMoneda } from "@/lib/format";
 import { clamp } from "@/lib/finance";
+import { card, cn } from "@/lib/ui";
 
 // Tacómetro semicircular: indica, según el interés, si consolidar te conviene.
 // Zonas fijas (ámbar → neutro → verde) + aguja que se mueve con los sliders.
@@ -75,7 +76,7 @@ export default function InterestGauge({
   }
 
   return (
-    <div className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white p-5 shadow-soft">
+    <div className={cn("flex flex-col items-center gap-1", card)}>
       <p className="text-sm font-medium text-muted">{g.titulo}</p>
       <svg
         viewBox="0 0 220 150"
