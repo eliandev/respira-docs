@@ -5,12 +5,25 @@ import { getDb } from "@/lib/firebase-admin";
 // firebase-admin necesita el runtime de Node (no Edge).
 export const runtime = "nodejs";
 
-// n8n espera un correo. Si el lead eligió WhatsApp o llamada (sin correo), mandamos
-// este por defecto para que el Lead Engine no falle. Configurable por env.
-const EMAIL_FALLBACK =
-  process.env.LEAD_FALLBACK_EMAIL ?? "geordymemdoza@gmail.com";
+// n8n espera un correo. Si el lead eligió WhatsApp o llamada (sin correo), usamos
+// este por defecto para que el Lead Engine no falle. Se configura SOLO por env; si no
+// está definido, el registro se guarda/manda sin campo `email` (nunca hardcodeamos
+// un correo personal en el repo).
+const EMAIL_FALLBACK = process.env.LEAD_FALLBACK_EMAIL?.trim() || undefined;
+
+// Límite defensivo: el payload legítimo (nombre, contacto, resumen) son < 1 KB.
+// Rechazamos cuerpos grandes antes de parsear para no gastar recursos en abuso.
+const MAX_BODY_BYTES = 8 * 1024;
 
 export async function POST(req: Request) {
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json(
+      { ok: false, error: "payload_grande" },
+      { status: 413 },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -30,16 +43,18 @@ export async function POST(req: Request) {
   }
   const lead = parsed.data;
 
-  // Correo garantizado para n8n: el que dejó el lead si eligió "Correo", o el default.
+  // Correo para n8n: el que dejó el lead si eligió "Correo", o el fallback de env
+  // (si está configurado). Puede quedar indefinido.
   const email =
     lead.contactoPreferido === "email" ? lead.contacto : EMAIL_FALLBACK;
 
   // `lead.resumen` ya es solo agregados: nunca guardamos el detalle por deuda.
+  // `email` se incluye solo si existe (Firestore rechaza campos `undefined`).
   const registro = {
     nombre: lead.nombre,
     contacto: lead.contacto,
     contactoPreferido: lead.contactoPreferido,
-    email,
+    ...(email ? { email } : {}),
     consentimiento: lead.consentimiento,
     resumen: lead.resumen,
     fuente: "respira-web",
